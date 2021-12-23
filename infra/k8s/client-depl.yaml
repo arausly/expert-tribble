@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: client-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      clientDeployment: client-depl
+  template:
+    metadata:
+      labels:
+        clientDeployment: client-depl
+    spec:
+      containers:
+        - name: client-depl
+          image: danxy1234/client
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: client-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    clientDeployment: client-depl
+  ports:
+    - name: client-service-port
+      protocol: TCP
+      port: 3000
+      targetPort: 3000

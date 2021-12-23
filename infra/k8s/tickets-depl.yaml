@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tickets-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tickets-pod
+  template:
+    metadata:
+      labels:
+        app: tickets-pod
+    spec:
+      containers:
+        - name: tickets
+          image: danxy1234/tickets
+          env:
+            - name: MONGO_URI
+              value: mongodb://tickets-mongo-service:27017/tickets
+            - name: CLUSTER_ID
+              value: ticketing
+            - name: NATS_URL
+              value: http://nats-clusterip-service:4222
+            - name: CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: token-secret
+                  key: jwt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tickets-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: tickets-pod
+  ports:
+    - name: tickets
+      protocol: TCP
+      port: 4000
+      targetPort: 4000

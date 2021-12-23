@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-pod
+  template:
+    metadata:
+      labels:
+        app: payments-pod
+    spec:
+      containers:
+        - name: payments
+          image: danxy1234/payments
+          env:
+            - name: MONGO_URI
+              value: mongodb://payments-mongo-service:27017/tickets
+            - name: CLUSTER_ID
+              value: ticketing
+            - name: NATS_URL
+              value: http://nats-clusterip-service:4222
+            - name: STRIPE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: stripe-secret
+                  key: STRIPE_KEY
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: token-secret
+                  key: jwt
+            - name: CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: payments-pod
+  ports:
+    - name: payments
+      protocol: TCP
+      targetPort: 4000
+      port: 4000

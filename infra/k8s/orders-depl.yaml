@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: orders-pod
+  template:
+    metadata:
+      labels:
+        app: orders-pod
+    spec:
+      containers:
+        - name: orders-deployment
+          image: danxy1234/orders
+          env:
+            - name: MONGO_URI
+              value: mongodb://orders-mongo-clusterip-service:27017/auth
+            - name: CLUSTER_ID
+              value: ticketing
+            - name: NATS_URL
+              value: http://nats-clusterip-service:4222
+            - name: CLIENT_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: JWT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: token-secret
+                  key: jwt
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-clusterip-service
+spec:
+  type: ClusterIP
+  selector:
+    app: orders-pod
+  ports:
+    - name: order
+      protocol: TCP
+      port: 4000
+      targetPort: 4000
