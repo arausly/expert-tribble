@@ -12,6 +12,7 @@ const start = async () => {
     console.error(err);
   }
   app.listen(3000, () => {
+    console.log("starting auth server...");
     console.log("\x1b[32m%s\x1b[0m", "App is 🏃‍♂️🏃‍♂️🏃‍♂️🏃‍♂️🏃‍♂️ on port 3000");
   });
 };
