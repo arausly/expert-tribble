@@ -3,9 +3,10 @@ on:
   pull_request:
     branches:
       - develop
-jobs: 
-  build: 
+      - master
+jobs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: cd auth && yarn install --production && yarn test:ci
+      - run: cd auth && yarn && yarn test:ci
